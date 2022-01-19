@@ -7,7 +7,7 @@ custom web apps for machine learning and data science. In just a few minutes you
 [Streamlit Docs]: https://docs.streamlit.io/library/get-started
 
 #### To run this Application
-Open your shell or terminal and install the relevant packages usng the command below
+Open your shell or terminal and install the relevant packages using the command below
 
 ```python
 pip install -r requirements.txt
