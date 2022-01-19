@@ -14,4 +14,4 @@ pip install -r requirements.txt
 ```
 
 #### Dashboard Example: 
-![Dashboard](https://github.com/RONALD55/Python-Streamlit-Covid-19-Dashboard/tree/main/components/img/image.png "Covid 19 Dashboard")
+![Dashboard](components/img/image.png "Covid 19 Dashboard")
