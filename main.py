@@ -144,7 +144,7 @@ def covid_data_menu():
 
             st.markdown(f"""</br> Reference for Tips : <a href="https://internationalmedicalcorps.org/emergency-response/covid-19/coronavirus-prevention-tips/">IMC</a>""",unsafe_allow_html=True)
     except ConnectionError as e:
-        st.error("There is a connection error please retry later")
+        st.error("There is a connection error please retry later 😥")
 
 
 def other_tab():
