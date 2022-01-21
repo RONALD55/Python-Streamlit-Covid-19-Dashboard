@@ -110,8 +110,8 @@ def covid_data_menu():
 
             st.write("Covid Statistics")
             data.pop("country")
-            df_1 = pd.DataFrame.from_dict(data, orient="index", dtype=str, columns=['Value'])
-            st.write(df_1)
+            df = pd.DataFrame.from_dict(data, orient="index", dtype=str, columns=['Value'])
+            st.write(df)
 
         with col2:
             st.write("Map")
@@ -144,7 +144,7 @@ def covid_data_menu():
 
             st.markdown(f"""</br> Reference for Tips : <a href="https://internationalmedicalcorps.org/emergency-response/covid-19/coronavirus-prevention-tips/">IMC</a>""",unsafe_allow_html=True)
     except ConnectionError as e:
-        st.error("There is a connection error please retry later")
+        st.error("There is a connection error please retry later 😥")
 
 
 def other_tab():
