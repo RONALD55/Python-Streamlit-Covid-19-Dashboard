@@ -14,7 +14,8 @@ import requests
 import streamlit as st
 from PIL import Image
 from requests.exceptions import ConnectionError
-
+import plotly.graph_objects as go
+from datetime import date,datetime
 
 def config():
     file_path = "./components/img/"
@@ -70,8 +71,15 @@ def covid_data_menu():
     with col2:
         pass
     with col3:
-        option = st.selectbox('please select country?', (list_of_countries()), help="Please select country")
+        try:
+            url = "https://disease.sh/v3/covid-19/countries"
+            response = requests.get(url)
+            countries = [i.get("country") for i in response.json()]
+            option = st.selectbox('please select country?', (countries), help="Please select country")
 
+
+        except ConnectionError:
+            st.error("There is a connection error we failed to fetch all the countries 😥")
     try:
         response = requests.get("https://disease.sh/v3/covid-19/countries/" + option)
         data = response.json()
@@ -110,6 +118,7 @@ def covid_data_menu():
 
             st.write("Covid Statistics")
             data.pop("country")
+            data['updated'] = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
             df = pd.DataFrame.from_dict(data, orient="index", dtype=str, columns=['Value'])
             st.write(df)
 
@@ -125,24 +134,50 @@ def covid_data_menu():
                 )
             ))
 
+        st.subheader("Vaccination Data")
+        current_date = datetime.today().date()
+        first_day_of_month = current_date.replace(day=1)
+        number_of_days = (date.today() - first_day_of_month).days
+
+        url = "https://disease.sh/v3/covid-19/vaccine/coverage/countries?lastdays=" + str(number_of_days)
+        response = requests.get(url)
+        vaccination_data = {}
+        for i in response.json():
+            if i.get("country") == option:
+                vaccination_data = i.get("timeline")
+
+        if len(vaccination_data) != 0:
+            vaccination_data = {str(key): str(value) for key, value in vaccination_data.items()}
+            st.write(vaccination_data)
+            df = pd.DataFrame({'date': vaccination_data.keys(), 'vaccination_value': vaccination_data.values()})
+            trace = go.Bar(x=df['date'], y=df['vaccination_value'], showlegend=True)
+            layout = go.Layout(title=option)
+            data = [trace]
+            fig = go.Figure(data=data, layout=layout)
+            st.plotly_chart(fig)
+        else:
+            st.write("Vaccination data for %s no available" % option)
+
         with st.expander('Covid 19 Prevention Tips'):
             st.subheader("Here’s what you can do to protect yourself:")
-            st.markdown(f"""<p>At International Medical Corps, we’re always preparing for the unexpected—whether it’s 
-            an earthquake, a hurricane or an outbreak of infectious disease. As the COVID-19 outbreak grows, 
-            it’s important to know that there are many actions we can take to protect ourselves, our loved ones and 
+            st.markdown(f"""<p>At International Medical Corps, we’re always preparing for the unexpected—whether it’s
+            an earthquake, a hurricane or an outbreak of infectious disease. As the COVID-19 outbreak grows,
+            it’s important to know that there are many actions we can take to protect ourselves, our loved ones and
             our communities.</p>""", unsafe_allow_html=True)
 
             st.subheader("Here’s what you can do to protect yourself:")
-            st.markdown(f""" <ul> <li>Wash your hands frequently with soap and water for at least 20 seconds.</li> 
-            <li>If soap and water are not available, use an alcohol-based hand sanitizer with at least 60% 
-            alcohol.</li> <li>Avoid close contact with people who are sick.</li> <li>Especially if you’re in a 
-            high-risk group, consider limiting your exposure to others, using social distancing—for example, 
+            st.markdown(f""" <ul> <li>Wash your hands frequently with soap and water for at least 20 seconds.</li>
+            <li>If soap and water are not available, use an alcohol-based hand sanitizer with at least 60%
+            alcohol.</li> <li>Avoid close contact with people who are sick.</li> <li>Especially if you’re in a
+            high-risk group, consider limiting your exposure to others, using social distancing—for example,
             avoid large gatherings, crowds of people and frequent trips to the store.</li>
             </li>Visit your state and local public-health websites for additional guidance specific to your area.</li>
              <li>Those at higher risk for serious illness should take additional precautions.</li>
-              </ul> """,unsafe_allow_html=True)
+              </ul> """, unsafe_allow_html=True)
 
-            st.markdown(f"""</br> Reference for Tips : <a href="https://internationalmedicalcorps.org/emergency-response/covid-19/coronavirus-prevention-tips/">IMC</a>""",unsafe_allow_html=True)
+            st.markdown(
+                f"""</br> Reference for Tips : <a href="https://internationalmedicalcorps.org/emergency-response/covid-19/coronavirus-prevention-tips/">IMC</a>""",
+                unsafe_allow_html=True)
     except ConnectionError as e:
         st.error("There is a connection error please retry later 😥")
 
